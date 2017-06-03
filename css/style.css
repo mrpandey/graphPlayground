@@ -1,0 +1,86 @@
+body {
+  margin:0;
+  font-family: Helvetica, Arial;
+}
+
+a {
+  text-decoration: none;
+  color: #1f77b4;
+}
+
+p {
+  font-size: 16px;
+  color: #333;
+  line-height: 18px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+h1 {
+  margin-top: 20px;
+  font-size: 36px;
+  font-weight: 300;
+  color: #444;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+b {
+  color: #d62828;
+}
+
+#container {
+  width: 700px;
+  margin:auto;
+}
+
+#instructions {
+  margin-top:20px;
+}
+
+#svg-wrap {
+  margin-top:20px;
+}
+
+#signature {
+  text-align: center;
+}
+
+/*graph styling*/
+svg {
+  cursor: crosshair;
+  display: block;
+  margin:auto;
+  border: 1px solid #eee;
+}
+
+.edge {
+  stroke: #888;
+  stroke-width:2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  cursor: default;
+}
+
+.edge:hover, .dragLine {
+  stroke: #333;
+  stroke-width: 3px;
+}
+
+.vertex {
+  cursor: pointer;
+}
+
+.vertex:hover {
+  stroke: #333;
+  opacity: 0.8;
+}
+
+.dragLine.hidden {
+	stroke-width:0;
+}
