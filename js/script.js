@@ -1,6 +1,5 @@
 //node ids are in order in which nodes come in existence
 var nodes = [
-            {id: 0},
             {id: 1},
             {id: 2},
             {id: 3},
@@ -12,33 +11,44 @@ var nodes = [
             {id: 9},
             {id: 10},
             {id: 11},
+            {id: 12},
+            {id: 13},
 ];
-
-var lastNodeId = nodes.length-1;
 
 var links = [
             {source:0, target:1},
-            {source:0, target:7},
-            {source:0, target:8},
-            {source:0, target:9},
+            {source:0, target:2},
+            {source:0, target:3},
+            {source:0, target:4},
+            {source:0, target:5},
+            {source:0, target:6},
             {source:1, target:2},
-            {source:1, target:9},
             {source:2, target:3},
-            {source:2, target:9},
-            {source:2, target:10},
             {source:3, target:4},
-            {source:3, target:10},
             {source:4, target:5},
-            {source:4, target:10},
-            {source:4, target:11},
             {source:5, target:6},
+            {source:6, target:1},//
+            {source:1, target:7},
+            {source:2, target:7},
+            {source:2, target:8},
+            {source:3, target:8},
+            {source:3, target:9},
+            {source:4, target:9},//
+            {source:4, target:10},
+            {source:5, target:10},
             {source:5, target:11},
-            {source:6, target:7},
-            {source:6, target:8},
             {source:6, target:11},
+            {source:6, target:12},
+            {source:1, target:12},//
             {source:7, target:8},
+            {source:8, target:9},
+            {source:9, target:10},
+            {source:10, target:11},
+            {source:11, target:12},
+            {source:12, target:7},
 ];
 
+var lastNodeId = nodes.length;
 var w = 700,
     h = 500,
     rad = 10;
@@ -63,7 +73,10 @@ var force = d3.layout.force()
             .links(links)
             .size([w, h])
             .linkDistance(60)
-            .charge(-600)
+            .linkStrength(0.9)
+            .charge(-500)
+            .chargeDistance((w+h)/2)
+            .gravity(0.12)
             .on("tick",tick);
             //.start();
 
@@ -98,7 +111,10 @@ function addNode(){
   }
 }
 
-function removeNode(d, i){    //d is data, i is index according to selection
+//d is data, i is index according to selection
+function removeNode(d, i){
+  //to make ctrl-drag works for mac/osx users
+  if(d3.event.ctrlKey) return;
   nodes.splice(nodes.indexOf(d),1);
   var linksToRemove = links.filter(function(l){
     return l.source===d || l.target===d;
@@ -117,8 +133,10 @@ function removeEdge(d, i){
 }
 
 function beginDragLine(d){
-	d3.event.stopPropagation();		//to prevent call of addNode through svg
-	d3.event.preventDefault();		//to prevent dragging of svg in firefox
+  //to prevent call of addNode through svg
+	d3.event.stopPropagation();
+  //to prevent dragging of svg in firefox
+	d3.event.preventDefault();
 	if(d3.event.ctrlKey || d3.event.button!=0) return;
 	mousedownNode = d;
 	dragLine.classed("hidden", false)
@@ -141,9 +159,8 @@ function hideDragLine(){
 }
 
 //no need to call hideDragLine in endDragLine
-//mouseup on vertices is propagates to svg and hence hideDragLine
+//mouseup on vertices propagates to svg which calls hideDragLine
 function endDragLine(d){
-	//if(d3.event.ctrlKey) return;
 	if(!mousedownNode || mousedownNode===d) return;
 	//return if link already exists
 	for(var i=0; i<links.length; i++){
