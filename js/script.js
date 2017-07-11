@@ -27,19 +27,19 @@ var links = [
             {source:3, target:4},
             {source:4, target:5},
             {source:5, target:6},
-            {source:6, target:1},//
+            {source:6, target:1},
             {source:1, target:7},
             {source:2, target:7},
             {source:2, target:8},
             {source:3, target:8},
             {source:3, target:9},
-            {source:4, target:9},//
+            {source:4, target:9},
             {source:4, target:10},
             {source:5, target:10},
             {source:5, target:11},
             {source:6, target:11},
             {source:6, target:12},
-            {source:1, target:12},//
+            {source:1, target:12},
             {source:7, target:8},
             {source:8, target:9},
             {source:9, target:10},
@@ -52,6 +52,10 @@ var lastNodeId = nodes.length;
 var w = 700,
     h = 500,
     rad = 10;
+
+nodes.forEach(function(d, i){
+	d.x = d.y = w*i/lastNodeId;
+});
 
 var svg = d3.select("#svg-wrap")
             .append("svg")
@@ -77,8 +81,8 @@ var force = d3.layout.force()
             .charge(-500)
             .chargeDistance((w+h)/2)
             .gravity(0.12)
-            .on("tick",tick);
-            //.start();
+            .on("tick",tick)
+            .start();
 
 var colors = d3.scale.category10();
 
@@ -127,7 +131,7 @@ function removeNode(d, i){
 }
 
 function removeEdge(d, i){
-  links.splice(i,1);
+  links.splice(links.indexOf(d),1);
   d3.event.preventDefault();
   restart();
 }
@@ -196,9 +200,7 @@ function keyup(){
 //updates the graph by updating links, nodes and binding them with DOM
 //interface is defined through several events
 function restart(){
-  edges = edges.data(links);
-  //vertices are known by id
-  vertices = vertices.data(nodes, function(d){return d.id;});
+  edges = edges.data(links, function(d){return "v"+d.source.id+"-v"+d.target.id;});
 
   edges.enter()
         .append("line")
@@ -206,12 +208,17 @@ function restart(){
         .on("mousedown", function(){d3.event.stopPropagation();})
         .on("contextmenu", removeEdge)
         .on("mouseover", function(d){
-        	d3.select(this)
-        		.append("title")
-        		.text("v"+d.source.id+"-v"+d.target.id);
+        	var thisEdge = d3.select(this);
+          if(thisEdge.select("title").empty()){
+            thisEdge.append("title")
+        		        .text("v"+d.source.id+"-v"+d.target.id);
+          }
         });
 
   edges.exit().remove();
+
+  //vertices are known by id
+  vertices = vertices.data(nodes, function(d){return d.id;});
 
   vertices.enter()
           .append("circle")
@@ -223,9 +230,11 @@ function restart(){
           .on("mousedown", beginDragLine)
           .on("mouseup", endDragLine)
           .on("mouseover", function(d){
-          	d3.select(this)
-          		.append("title")
-          		.text("v"+d.id);
+          	var thisVertex = d3.select(this);
+			      if(thisVertex.select("title").empty()){
+			        thisVertex.append("title")
+			    		          .text("v"+d.id);
+			      }
           })
           .on("contextmenu", removeNode);
 
