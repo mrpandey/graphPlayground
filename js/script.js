@@ -88,6 +88,14 @@ var colors = d3.scale.category10();
 
 var mousedownNode = null, mouseupNode = null;
 
+d3.select("#clear")
+  .on('click', function(){
+    nodes.splice(0);
+    links.splice(0);
+    lastNodeId=0;
+    restart();
+  });
+
 function resetMouseVar(){
 	mousedownNode = null;
 	mouseupNode = null;
