@@ -154,14 +154,12 @@ function beginDragLine(d){
 	dragLine.classed("hidden", false)
 					.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y + 
 						"L" + mousedownNode.x + "," + mousedownNode.y);
-	restart();
 }
 
 function updateDragLine(){
 	if(!mousedownNode) return;
 	dragLine.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y + 
 									"L" + d3.mouse(this)[0] + "," + d3.mouse(this)[1]);
-	restart();
 }
 
 function hideDragLine(){
