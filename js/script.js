@@ -253,7 +253,7 @@ svg.on("mousedown", addNode)
 	  .on("mousemove", updateDragLine)
 	  .on("mouseup", hideDragLine)
 	  .on("contextmenu", function(){d3.event.preventDefault();})
-	  .on("mouseleave", function(){hideDragLine(); resetMouseVar();});
+	  .on("mouseleave", hideDragLine);
 
 d3.select(window)
   .on('keydown', keydown)
