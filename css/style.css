@@ -21,6 +21,7 @@ h1 {
   font-size: 36px;
   font-weight: 300;
   color: #444;
+  text-align: center;
 }
 
 hr {
@@ -35,12 +36,13 @@ b {
 }
 
 #container {
-  width: 700px;
-  margin:auto;
+  margin: auto;
 }
 
 #instructions {
   margin-top:20px;
+  width: 700px;
+  margin: auto;
 }
 
 button {

@@ -49,9 +49,12 @@ var links = [
 ];
 
 var lastNodeId = nodes.length;
-var w = 700,
-    h = 500,
+var viewWid = document.documentElement.clientWidth;
+var w = viewWid>1200 ? 900 : 700,
+    h = w==900 ? 600 : 500,
     rad = 10;
+
+document.getElementById("container").style.width = ""+w+"px";
 
 nodes.forEach(function(d, i){
 	d.x = d.y = w*i/lastNodeId;
@@ -152,13 +155,13 @@ function beginDragLine(d){
 	if(d3.event.ctrlKey || d3.event.button!=0) return;
 	mousedownNode = d;
 	dragLine.classed("hidden", false)
-					.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y + 
+					.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y +
 						"L" + mousedownNode.x + "," + mousedownNode.y);
 }
 
 function updateDragLine(){
 	if(!mousedownNode) return;
-	dragLine.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y + 
+	dragLine.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y +
 									"L" + d3.mouse(this)[0] + "," + d3.mouse(this)[1]);
 }
 
