@@ -52,6 +52,7 @@ button {
   border: 1px solid #ccc;
   cursor: pointer;
   margin-top: 10px;
+  color: #333;
 }
 
 button:hover {
