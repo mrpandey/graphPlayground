@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="img/star-graph.png">
+</p>
+
 # graphPlayground
 
 [![Click to see the action](https://forthebadge.com/images/badges/check-it-out.svg)](https://mrpandey.github.io/graphPlayground/)
@@ -9,7 +13,7 @@ Meant for recreational and fun purpose. [**Click here**](https://mrpandey.github
 
 #### Similar Project
 
-If you loved it, please take a look at [D3 Graph Theory](https://mrpandey.github.io/d3graphTheory/). It is an extension of this project, made with the purpose to teach graph theory in an interactive manner.
+If you liked it, please take a look at [D3 Graph Theory](https://mrpandey.github.io/d3graphTheory/). It is an extension of this project, made with the purpose to teach graph theory in an interactive manner.
 
 #### Attributions
 
