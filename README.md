@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="img/star-graph.png">
+  <img src="img/wheel-graph.png">
 </p>
 
 # graphPlayground
