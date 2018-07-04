@@ -3,9 +3,9 @@
 [![Click to see the action](https://forthebadge.com/images/badges/check-it-out.svg)](https://mrpandey.github.io/graphPlayground/)
 ![forthebadge](https://forthebadge.com/images/badges/made-with-javascript.svg)
 
-Lets you create interactive graph (or network) diagrams. You can add vertices and draw edges to connect them. These elements react according to various forces acting on them.
+A webpage which lets you create interactive graph (or network) diagrams. You can add vertices and draw edges to connect them. These elements react according to various forces acting on them.
 
-Meant for recreational and fun purpose.
+Meant for recreational and fun purpose. [**Click here**](https://mrpandey.github.io/graphPlayground/) to visit.
 
 #### Similar Project
 
