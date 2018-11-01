@@ -249,25 +249,39 @@ d3.select("#clear")
 // Functions to enable draging of nodes when ctrl is held
 
 //one response per ctrl keydown
-// var lastKeyDown = -1;
+var lastKeyDown = -1;
 
-// d3.select(window)
-//   .on('keydown', keydown)
-//   .on('keyup', keyup);
+d3.select(window)
+  .on('keydown', keydown)
+  .on('keyup', keyup);
 
-// function keydown(){
-//   d3.event.preventDefault();
-//   if(lastKeyDown !== -1) return;
-//   lastKeyDown = d3.event.key;
+function keydown(){
+  d3.event.preventDefault();
+  if(lastKeyDown !== -1) return;
+  lastKeyDown = d3.event.key;
 
-//   if(lastKeyDown === "Control"){
-//     vertices.call(drag(simulation));
-//   }
-// }
+  if(lastKeyDown === "Control"){
+    vertices.call(d3.drag()
+                    .on("start", function dragstarted(d) {
+                      if (!d3.event.active) simulation.alphaTarget(1).restart();
+                      d.fx = d.x;
+                      d.fy = d.y;
+                    })
+                    .on("drag", function(d){
+                      d.fx = d3.event.x;
+                      d.fy = d3.event.y;
+                    })
+                    .on("end", function(d){
+                      if (!d3.event.active) simulation.alphaTarget(0);
+                      d.fx = null;
+                      d.fy = null;
+                    }));
+  }
+}
 
-// function keyup(){
-//   lastKeyDown = -1;
-//   if(d3.event.key === "Control"){
-//     vertices.on("mousedown.drag", null);
-//   }
-// }
+function keyup(){
+  lastKeyDown = -1;
+  if(d3.event.key === "Control"){
+    vertices.on("mousedown.drag", null);
+  }
+}
