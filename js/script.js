@@ -1,3 +1,5 @@
+// CORE STUFF TO DRAW GRAPH //
+
 //node ids are in order in which nodes come in existence
 var nodes = [
             {id: 1},
@@ -50,61 +52,39 @@ var links = [
 
 var lastNodeId = nodes.length;
 var viewWid = document.documentElement.clientWidth;
-var w = viewWid>1200 ? 900 : 700,
-    h = w==900 ? 600 : 500,
-    rad = 10;
+var w = viewWid>1200 ? 900 : 700;
+var h = w==900 ? 600 : 500;
+var rad = 10;
 
 document.getElementById("container").style.width = ""+w+"px";
-
-nodes.forEach(function(d, i){
-	d.x = d.y = w*i/lastNodeId;
-});
 
 var svg = d3.select("#svg-wrap")
             .append("svg")
             .attr("width", w)
             .attr("height", h);
 
+//array of colors for nodes
+var colors = d3.schemeCategory10;
+
+//the animation line when adding edge b/w two vertices
 var dragLine = svg.append("path")
-									.attr("class", "dragLine hidden")
-									.attr("d", "M0,0L0,0");
+                  .attr("class", "dragLine hidden")
+                  .attr("d", "M0,0L0,0");
 
 var edges = svg.append("g")
-								.selectAll(".edge");
+               .selectAll(".edge");
 
 var vertices = svg.append("g")
-									.selectAll(".vertex");
+                  .selectAll(".vertex");
 
-var force = d3.layout.force()
-            .nodes(nodes)
-            .links(links)
-            .size([w, h])
-            .linkDistance(60)
-            .linkStrength(0.9)
-            .charge(-500)
-            .chargeDistance((w+h)/2)
-            .gravity(0.12)
-            .on("tick",tick)
-            .start();
+var simulation = d3.forceSimulation()
+                   .force("charge", d3.forceManyBody().strength(-300).distanceMax(w/2))
+                   .force("link", d3.forceLink().distance(60))
+                   .force("x", d3.forceX(w/2))
+                   .force("y", d3.forceY(h/2))
+                   .on("tick", tick);
 
-var colors = d3.scale.category10();
-
-var mousedownNode = null, mouseupNode = null;
-
-d3.select("#clear")
-  .on('click', function(){
-    nodes.splice(0);
-    links.splice(0);
-    lastNodeId=0;
-    restart();
-  });
-
-function resetMouseVar(){
-	mousedownNode = null;
-	mouseupNode = null;
-}
-
-//update the simulation
+//update positions of edges and vertices with each internal timer's tick
 function tick() {
 
   edges.attr("x1", function(d) { return d.source.x; })
@@ -113,9 +93,67 @@ function tick() {
        .attr("y2", function(d) { return d.target.y; });
 
   vertices.attr("cx", function(d) { return d.x; })
-       .attr("cy", function(d) { return d.y; });
-
+          .attr("cy", function(d) { return d.y; });
 }
+
+//updates the graph by updating links, nodes and binding them with DOM
+//interface is defined through several events
+function restart(){
+  edges = edges.data(links, function(d){return "v"+d.source.id+"-v"+d.target.id;});
+  edges.exit().remove();
+  edges = edges.enter()
+               .append("line")
+               .attr("class","edge")
+               .on("mousedown", function(){d3.event.stopPropagation();})
+               .on("contextmenu", removeEdge)
+               .on("mouseover", function(d){
+                  var thisEdge = d3.select(this);
+                  if(thisEdge.select("title").empty()){
+                    thisEdge.append("title")
+                            .text("v"+d.source.id+"-v"+d.target.id);
+                  }
+                })
+               .merge(edges);
+
+  //vertices are known by id
+  vertices = vertices.data(nodes, function(d){return d.id;});
+  vertices.exit().remove();
+  vertices = vertices.enter()
+                     .append("circle")
+                     .attr("r", rad)
+                     .attr("class", "vertex")
+                     .style("fill", function(d,i){
+                       return colors[d.id%10];
+                      })
+                     .on("mousedown", beginDragLine)
+                     .on("mouseup", endDragLine)
+                     .on("mouseover", function(d){
+                        var thisVertex = d3.select(this);
+                        if(thisVertex.select("title").empty()){
+                          thisVertex.append("title")
+                                    .text("v"+d.id);
+                        }
+                      })
+                     .on("contextmenu", removeNode)
+                     .merge(vertices);
+
+  simulation.nodes(nodes);
+  simulation.force("link").links(links);
+  simulation.alpha(0.8).restart();
+}
+
+restart();
+
+// CORE STUFF TO DRAW GRAPH ENDS //
+
+// FUNCTIONS TO MANIPULATE GRAPH //
+
+//interface for manipulation
+svg.on("mousedown", addNode)
+   .on("mousemove", updateDragLine)
+   .on("mouseup", hideDragLine)
+   .on("contextmenu", function(){d3.event.preventDefault();})
+   .on("mouseleave", hideDragLine);
 
 function addNode(){
   if(d3.event.button==0){
@@ -147,119 +185,89 @@ function removeEdge(d, i){
   restart();
 }
 
-function beginDragLine(d){
-  //to prevent call of addNode through svg
-	d3.event.stopPropagation();
-  //to prevent dragging of svg in firefox
-	d3.event.preventDefault();
-	if(d3.event.ctrlKey || d3.event.button!=0) return;
-	mousedownNode = d;
-	dragLine.classed("hidden", false)
-					.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y +
-						"L" + mousedownNode.x + "," + mousedownNode.y);
-}
+//dragLine is used to add edge graphicaly b/w two nodes
 
-function updateDragLine(){
-	if(!mousedownNode) return;
-	dragLine.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y +
-									"L" + d3.mouse(this)[0] + "," + d3.mouse(this)[1]);
+//the two nodes of edges are mousedownNode and mouseupNode
+var mousedownNode = null;
+var mouseupNode = null;
+
+function resetMouseVar(){
+  mousedownNode = null;
+  mouseupNode = null;
 }
 
 function hideDragLine(){
-	dragLine.classed("hidden", true);
-	resetMouseVar();
-	restart();
+  dragLine.classed("hidden", true);
+  resetMouseVar();
+  restart();
+}
+
+function beginDragLine(d){
+  //to prevent call of addNode through svg
+  d3.event.stopPropagation();
+  //to prevent dragging of svg in firefox
+  d3.event.preventDefault();
+  if(d3.event.ctrlKey || d3.event.button!=0) return;
+  mousedownNode = d;
+  dragLine.classed("hidden", false)
+          .attr("d", "M" + mousedownNode.x + "," + mousedownNode.y +
+            "L" + mousedownNode.x + "," + mousedownNode.y);
+}
+
+function updateDragLine(){
+  if(!mousedownNode) return;
+  dragLine.attr("d", "M" + mousedownNode.x + "," + mousedownNode.y +
+                "L" + d3.mouse(this)[0] + "," + d3.mouse(this)[1]);
 }
 
 //no need to call hideDragLine in endDragLine
 //mouseup on vertices propagates to svg which calls hideDragLine
 function endDragLine(d){
-	if(!mousedownNode || mousedownNode===d) return;
-	//return if link already exists
-	for(var i=0; i<links.length; i++){
-		var l = links[i];
-		if((l.source===mousedownNode && l.target===d) || (l.source===d && l.target===mousedownNode)){
-			return;
-		}
-	}
-	var newLink = {source: mousedownNode, target:d};
-	links.push(newLink);
+  if(!mousedownNode || mousedownNode===d) return;
+  //return if link already exists
+  for(var i=0; i<links.length; i++){
+    var l = links[i];
+    if((l.source===mousedownNode && l.target===d) || (l.source===d && l.target===mousedownNode)){
+      return;
+    }
+  }
+  var newLink = {source: mousedownNode, target:d};
+  links.push(newLink);
 }
+
+//clearAll button
+d3.select("#clear")
+  .on('click', function(){
+    nodes.splice(0);
+    links.splice(0);
+    lastNodeId=0;
+    restart();
+  });
+
+// FUNCTIONS TO MANIPULATE GRAPH ENDS //
+
+// Functions to enable draging of nodes when ctrl is held
 
 //one response per ctrl keydown
-var lastKeyDown = -1;
+// var lastKeyDown = -1;
 
-function keydown(){
-	d3.event.preventDefault();
-	if(lastKeyDown !== -1) return;
-	lastKeyDown = d3.event.key;
+// d3.select(window)
+//   .on('keydown', keydown)
+//   .on('keyup', keyup);
 
-	if(lastKeyDown === "Control"){
-		vertices.call(force.drag);
-	}
-}
+// function keydown(){
+//   d3.event.preventDefault();
+//   if(lastKeyDown !== -1) return;
+//   lastKeyDown = d3.event.key;
 
-function keyup(){
-	lastKeyDown = -1;
-	if(d3.event.key === "Control"){
-		vertices.on("mousedown.drag", null);
-	}
-}
+//   if(lastKeyDown === "Control"){
+//     vertices.call(drag(simulation));
+//   }
+// }
 
-//updates the graph by updating links, nodes and binding them with DOM
-//interface is defined through several events
-function restart(){
-  edges = edges.data(links, function(d){return "v"+d.source.id+"-v"+d.target.id;});
-
-  edges.enter()
-        .append("line")
-        .attr("class","edge")
-        .on("mousedown", function(){d3.event.stopPropagation();})
-        .on("contextmenu", removeEdge)
-        .on("mouseover", function(d){
-        	var thisEdge = d3.select(this);
-          if(thisEdge.select("title").empty()){
-            thisEdge.append("title")
-        		        .text("v"+d.source.id+"-v"+d.target.id);
-          }
-        });
-
-  edges.exit().remove();
-
-  //vertices are known by id
-  vertices = vertices.data(nodes, function(d){return d.id;});
-
-  vertices.enter()
-          .append("circle")
-          .attr("r", rad)
-          .attr("class", "vertex")
-          .style("fill", function(d,i){
-          	return colors(d.id);
-          })
-          .on("mousedown", beginDragLine)
-          .on("mouseup", endDragLine)
-          .on("mouseover", function(d){
-          	var thisVertex = d3.select(this);
-			      if(thisVertex.select("title").empty()){
-			        thisVertex.append("title")
-			    		          .text("v"+d.id);
-			      }
-          })
-          .on("contextmenu", removeNode);
-
-  vertices.exit().remove();
-  force.start();
-}
-
-//further interface
-svg.on("mousedown", addNode)
-	  .on("mousemove", updateDragLine)
-	  .on("mouseup", hideDragLine)
-	  .on("contextmenu", function(){d3.event.preventDefault();})
-	  .on("mouseleave", hideDragLine);
-
-d3.select(window)
-  .on('keydown', keydown)
-  .on('keyup', keyup);
-
-restart();
+// function keyup(){
+//   lastKeyDown = -1;
+//   if(d3.event.key === "Control"){
+//     vertices.on("mousedown.drag", null);
+//   }
+// }
