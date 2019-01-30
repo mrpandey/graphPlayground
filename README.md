@@ -22,5 +22,5 @@ If you liked it, please take a look at [D3 Graph Theory](https://mrpandey.github
 
 #### License
 
-Copyright (c) 2017-18 Avinash Pandey.
+Copyright (c) 2017-19 Avinash Pandey.
 All the contents of this repository is bound by [MIT License](https://github.com/mrpandey/graphPlayground/blob/master/LICENSE.md).
